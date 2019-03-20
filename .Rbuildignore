@@ -1,0 +1,5 @@
+^Meta$
+^doc$
+^koboloops\.Rproj$
+^\.Rproj\.user$
+^.*\.Rproj$
