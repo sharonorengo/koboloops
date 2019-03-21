@@ -1,8 +1,7 @@
 library(testthat)
 library(koboloops)
 
-devtools::test_check("koboloops")
-
+devtools::test()
 
 parent_data1 <- data.frame( uuid=1:10, age_parent=runif(10,5,30), other=runif(10))
 loop_data1 <- data.frame (parent_uuid=sample(1:8,20,replace = T), initial=sample(letters,20,replace = T), index=1:20, age_child=sample(1:18, 20, replace = T))
