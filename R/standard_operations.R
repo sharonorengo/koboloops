@@ -66,6 +66,7 @@ add_parent_to_loop <- function(loop, parent , variables.to.keep=NULL , uuid.name
   parent_reorganised_by_loop_rows <- parent[index_of_loop_in_parent, ,drop=F]
 
   # Different cases for variables to keep
+
   # Case 1: Variables to keep are not specified (NULL). Copy all columns of parent except uuid column
   if (is.null(variables.to.keep)) {
     parent_variables <- names(parent)
@@ -93,18 +94,22 @@ add_parent_to_loop <- function(loop, parent , variables.to.keep=NULL , uuid.name
 #'
 #' @param loop a dataframe containing the loops
 #' @param parent a dataframe containing the parent informations
-#' @param variables.to.add one variable
-#' @param aggregate.function tbc
+#' @param variables.to.add variable(s) to aggregate
+#' @param aggregate.function function specify by the user to aggregate one or several variables
 #' @param uuid.name.loop optional: Specify the loop column containing the uuids. If not specify, searches for column containing uuid string
 #' @param uuid.name.parent optional: Specify the parent column containing the uuids. If not specify, searches for column containing uuid string
-#' @details to complete
-#' @return A dataframe
+#' @details Add to child information to the corresponding parent by aggregateing with a function specify by the user
+#' @return Parent dataframe with the results of the aggregation
 #' @examples
 #' parent <- data.frame(uuid=1:10, age=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
 #' child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
+#' aggregate.function <- function(x, variable.to.add){
+#'    result_aggregation <- sum(x[[variable.to.add]])
+#'    return(result_aggregation)
+#' }
+#' family <- affect_loop_to_parent(child, parent, "age",aggregate.function)
 #' @export
 #'
-
 affect_loop_to_parent <- function( loop , parent , aggregate.function, variable.to.add, uuid.name.loop=NULL,uuid.name.parent=NULL)
 {
   # warning on inputs
