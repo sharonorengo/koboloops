@@ -1,10 +1,10 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "detailed_example"
+author: "Sharon"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Detailed Example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,50 +16,65 @@ knitr::opts_chunk$set(
 )
 ```
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+# Specific test functions
 
-## Vignette Info
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+## Load the koboLoops Package
 
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r, results='hide', message=FALSE,warning=FALSE,error=FALSE}
+library("koboloops")
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+## Example data frame
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+Here we create some fake data for illustration purposes.
+It is not important to understand this; we keep it in so you can run the example yourself if you like.
+There are two datasets.
+The parent one contains:
+- variable `uuid`: values should be unique
+- variable `age`: values between 30 and 60
+- variable `parent_gender`
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+The child contains:
 
-## More Examples
+- variable `parent_uuid`: should be number among the uuid of the parent dataset
+- variable `age`: values between 1 and 18
+- variable `child_gender` just some numbers, but the column header indicates this is potentially sensitive
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+```{r}
+parent <- data.frame(uuid=1:10, age=sample(30:60,10,replace = T),parent_gender=sample(c("F","M"),10,replace = T))
+
+child <- data.frame(parent_uuid=sample(1:10,20,replace = T), age=sample(20,1,18), child_gender=sample(c("F","M"),20,replace = T))
 ```
 
-Also a quote using `>`:
+## Affect parent age to each child
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+
+```{r,eval=F}
+family <- add_parent_to_loop(child,parent,uuid.name.loop = "parent_uuid",uuid.name.parent = "uuid",c("age"))
+```
+
+run `?add_parent_to_loop` for details.
+
+## Affect all parent information to each child
+
+We affect to the parent the average ages of the children. 
+
+```{r}
+aggregate.function <- function(x, variable.to.add){
+  result_aggregation <- sum(x[[variable.to.add]])/length(x)
+  return(result_aggregation)
+}
+```
+
+```{r,eval=F}
+family <- affect_loop_to_parent(child,parent,aggregate.function, variable.to.add ="age", "parent_uuid","uuid")
+family
+```
+
+run `?affect_loop_to_parent` for details.
+
+
+
