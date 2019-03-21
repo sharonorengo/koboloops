@@ -144,6 +144,11 @@ affect_loop_to_parent <- function( loop , parent , aggregate.function, variable.
     }
   }
 
+  index_of_loop_in_parent<-match(loop[ ,uuid.name.loop],parent[ ,uuid.name.parent])
+  if (all(is.na(index_of_loop_in_parent))) {
+    stop("Could not find parent row corresponding to a loop row")
+  }
+
   split_pivot <- loop[[uuid.name.loop]] # attention si plusieurs colonne avec m?me mot
   split_loop <- split(loop, split_pivot)
 
