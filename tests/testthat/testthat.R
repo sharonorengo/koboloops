@@ -1,3 +1,4 @@
+context("testthat.R")
 library(testthat)
 library(koboloops)
 
