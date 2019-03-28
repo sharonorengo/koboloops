@@ -94,20 +94,17 @@ add_parent_to_loop <- function(loop, parent , variables.to.keep=NULL , uuid.name
 #'
 #' @param loop a dataframe containing the loops
 #' @param parent a dataframe containing the parent informations
-#' @param variables.to.add variable(s) to aggregate
-#' @param aggregate.function function specify by the user to aggregate one or several variables
+#' @param variable.to.add a name character vector. This vector contains the exact variable(s) name(s) of the loop dataframe that the user wants to aggregate.
+#' If there are multiple variables, the variables should be aggregate with the same function.
+#' @param aggregate.function function specify by the user to aggregate the variable specified in variable.to.add. This function should take a vector as a parameter and return a single output.
 #' @param uuid.name.loop optional: Specify the loop column containing the uuids. If not specify, searches for column containing uuid string
 #' @param uuid.name.parent optional: Specify the parent column containing the uuids. If not specify, searches for column containing uuid string
-#' @details Add to child information to the corresponding parent by aggregateing with a function specify by the user
+#' @details Add to the parent dataframe, column(s) that is(are) the result of the aggregation defined by the function aggregate.function.
 #' @return Parent dataframe with the results of the aggregation
 #' @examples
-#' parent <- data.frame(uuid=1:10, age=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
-#' child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
-#' aggregate.function <- function(x, variable.to.add){
-#'    result_aggregation <- sum(x[[variable.to.add]])
-#'    return(result_aggregation)
-#' }
-#' family <- affect_loop_to_parent(child, parent, "age",aggregate.function)
+#' parent <- data.frame(uuid=1:10, age_parent=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
+#' child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age_child=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
+#' family <- affect_loop_to_parent(child, parent,aggregate.function = sum , variable.to.add = c(sum_of_child_age="age_child"))
 #' @export
 #'
 affect_loop_to_parent <- function( loop , parent , aggregate.function, variable.to.add, uuid.name.loop=NULL,uuid.name.parent=NULL)
@@ -116,8 +113,6 @@ affect_loop_to_parent <- function( loop , parent , aggregate.function, variable.
   if (is.data.frame(loop) == FALSE)stop("loop parameter has to be a dataframe")
   if (is.data.frame(loop) == FALSE)stop("parent parameter has to be a dataframe")
   if (is.null(variable.to.add)==TRUE)stop("Please provide the name of a the loop column you want to add to the parent dataset.")
-  #if (is.vector(variable.to.add) == FALSE) {
-  # if (lenght(variable.to.add) >1)stop("variables.to.add parameter has to be a vector of one element") }
 
   #find uuid columns
   if (is.null(uuid.name.parent) == TRUE) {
@@ -149,35 +144,54 @@ affect_loop_to_parent <- function( loop , parent , aggregate.function, variable.
     }
   }
 
+  #if none loop uuid correspond to a parent uuid
   index_of_loop_in_parent<-match(loop[ ,uuid.name.loop],parent[ ,uuid.name.parent])
   if (all(is.na(index_of_loop_in_parent))) {
     stop("Could not find parent row corresponding to a loop row")
   }
 
-  split_pivot <- loop[[uuid.name.loop]] # attention si plusieurs colonne avec m?me mot
-  split_loop <- split(loop, split_pivot)
-
+  #if the variable(s) to add don't exist
   if (!all((variable.to.add %in% names(loop)))) {
-
     variables_Not_Exist = variable.to.add[which((variable.to.add %in% names(loop)) == FALSE)]
     variables_Not_Exist_Error_Message = paste0(variables_Not_Exist, collapse = ", ")
     variables_Not_Exist_Error_Message = paste("Variables not found in loop dataframe: ", variables_Not_Exist_Error_Message)
     stop(variables_Not_Exist_Error_Message)
-
   }
 
-  new_parent <- parent
+  #creates a list of dataframe. Each element of the list is a dataframe containing the loop rows corresponding to the same parent uuid
+  split_pivot <- loop[[uuid.name.loop]]
+  split_loop <- split(loop, split_pivot)
 
+  #For each variable to add, aggregate loop elements and add the result in a new column of the parent dataframe
+  new_parent <- parent
   for(i in 1:length(variable.to.add)){
 
-    result_aggregation <- lapply(split_loop, aggregate.function, variable.to.add[i])
-    new_parent[[variable.to.add[i]]]<-NA
+    # For each dataframe of the list, aggregate variable.to.add by using the function choosen by the user
+    result_aggregation <- lapply( lapply(split_loop, function(x) x[[variable.to.add[i]]]), aggregate.function)
+
+    #Rename the column containing the results of the aggregation
+    # if name is not specified
+    if(length(names(variable.to.add[i])) == 0 || names(variable.to.add[i]) == "" ){
+      new_variable_name <- paste0("Aggregation_Result_",variable.to.add[i])
+      while(new_variable_name %in% names(new_parent)){ #in order to have a unique column name
+        new_variable_name <- paste0(new_variable_name,"X")
+      }
+    }
+    else{
+      if(names(variable.to.add[i]) %in% names(new_parent)){
+        stop("Please choose another variable name. This column name already exists in the parent dataframe")
+      }
+      else{
+        new_variable_name <- names(variable.to.add[i])
+      }
+    }
+    new_parent[[variable.to.add[i]]]<-NA #NA for the parent that doesn't correspond to any loop rows
     uuid_into_parent=which((parent$uuid %in% names(result_aggregation))==TRUE)
     new_parent[[variable.to.add[i]]][uuid_into_parent] <- result_aggregation
+    names(new_parent)[length(new_parent)] <- new_variable_name
   }
 
   return(new_parent)
 }
-
 
 
