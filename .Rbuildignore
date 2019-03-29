@@ -3,4 +3,4 @@
 ^koboloops\.Rproj$
 ^\.Rproj\.user$
 ^.*\.Rproj$
-*.Rhistory
+^.*\.Rhistory$
