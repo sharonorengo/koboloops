@@ -12,24 +12,29 @@ affect_loop_to_parent(loop, parent, aggregate.function, variable.to.add,
 
 \item{parent}{a dataframe containing the parent informations}
 
-\item{aggregate.function}{tbc}
+\item{aggregate.function}{function specify by the user to aggregate one or several variables}
 
 \item{uuid.name.loop}{optional: Specify the loop column containing the uuids. If not specify, searches for column containing uuid string}
 
 \item{uuid.name.parent}{optional: Specify the parent column containing the uuids. If not specify, searches for column containing uuid string}
 
-\item{variables.to.add}{one variable}
+\item{variables.to.add}{variable(s) to aggregate}
 }
 \value{
-A dataframe
+Parent dataframe with the results of the aggregation
 }
 \description{
 Add rows of the parent dataframe
 }
 \details{
-to complete
+Add to child information to the corresponding parent by aggregateing with a function specify by the user
 }
 \examples{
 parent <- data.frame(uuid=1:10, age=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
 child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
+aggregate.function <- function(x, variable.to.add){
+   result_aggregation <- sum(x[[variable.to.add]])
+   return(result_aggregation)
+}
+family <- affect_loop_to_parent(child, parent, "age",aggregate.function)
 }

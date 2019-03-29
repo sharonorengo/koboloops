@@ -1,5 +1,5 @@
 ---
-title: "detailed_example"
+# title: "Detailed Example"
 author: "Sharon"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -31,8 +31,10 @@ library("koboloops")
 Here we create some fake data for illustration purposes.
 It is not important to understand this; we keep it in so you can run the example yourself if you like.
 There are two datasets.
+
 The parent one contains:
-- variable `uuid`: values should be unique
+
+- variable `uuid`: values must be unique
 - variable `age`: values between 30 and 60
 - variable `parent_gender`
 
