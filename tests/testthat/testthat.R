@@ -80,6 +80,11 @@ test_that("column name already exists in parent dataframe", {
   expect_error(affect_loop_to_parent(loop_data1, parent_data1,sum_index, c(age_parent="index")))
 })
 
+test_that("test for warning message", {
+  expect_warning(affect_loop_to_parent(loop_data1, parent_data3 ,sum_index, c("age_child")), regexp = "has been renamed: Aggregation_Result_age_childXX")
+
+})
+
 test_that("test for renaming column", {
   expect_identical( names(affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index",sum_child_age="age_child"))) , c("uuid","age_parent","other","index","sum_child_age"))
   expect_identical( affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index"))[,"uuid"] , parent_data1[,"uuid"])
@@ -89,7 +94,7 @@ test_that("test for renaming column", {
 
 
 test_that("positive test affect_loop_to_parent", {
-  expect_equal( nrow(affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index"))) , 10 )
+  expect_equal( nrow(affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c(index2="index"))) , 10 )
   expect_identical( names(affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index",sum_age_child="age_child"))) , c("uuid","age_parent","other","Aggregation_Result_index","sum_age_child"))
   expect_identical( affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index"))[,"uuid"] , parent_data1[,"uuid"])
 })

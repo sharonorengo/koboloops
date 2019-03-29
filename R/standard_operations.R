@@ -3,16 +3,14 @@
 #' @param loop a dataframe containing the loops
 #' @param parent a dataframe containing the parent informations
 #' @param variables.to.keep optional: a string or a vector of string containing the parent columns names that need to be copy in the loop dataset
-#' @param uuid.name.loop optional: Specify the loop column containing the uuids. If not specify, searches for column containing uuid string
-#' @param uuid.name.parent optional: Specify the parent column containing the uuids. If not specify, searches for column containing uuid string
-#' @details Searches for parent row for each row in loop, select the rows of the parent dataframe and add them to the loop dataframe
-#' @return loop dataframe with the chosen parent variables in addition
+#' @param uuid.name.loop optional: a string that specify the name of the loop column containing the uuids. If not specify, searches for column containing the uuid string
+#' @param uuid.name.parent optional: a string that specify the name of the parent column containing the uuids. If not specify, searches for column containing uuid string
+#' @details Searches for each row in loop dataframe if it matches with a row of the parent datarame. Select in the row of the parent dataframe, the information that the user wants to add to the loop dataframe
+#' @return the loop dataframe to which for each row has been added the corresponding value of the parent dataframe variable
 #' @examples
 #' parent <- data.frame(uuid=1:10, age=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
 #' child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
 #' family<- add_parent_to_loop(child,parent,c("age"))
-#' equivalente to
-#' family<- add_parent_to_loop(child,parent,"parent_uuid","uuid",c("age"))
 #' @export
 #'
 add_parent_to_loop <- function(loop, parent , variables.to.keep=NULL , uuid.name.loop=NULL , uuid.name.parent=NULL)
@@ -53,9 +51,7 @@ add_parent_to_loop <- function(loop, parent , variables.to.keep=NULL , uuid.name
     }
   }
 
-
   # find parent row for each row in loop:
-
   index_of_loop_in_parent<-match(loop[ ,uuid.name.loop],parent[ ,uuid.name.parent])
 
   if (all(is.na(index_of_loop_in_parent))) {
@@ -95,16 +91,17 @@ add_parent_to_loop <- function(loop, parent , variables.to.keep=NULL , uuid.name
 #' @param loop a dataframe containing the loops
 #' @param parent a dataframe containing the parent informations
 #' @param variable.to.add a name character vector. This vector contains the exact variable(s) name(s) of the loop dataframe that the user wants to aggregate.
-#' If there are multiple variables, the variables should be aggregate with the same function.
+#' If there are multiple variables, the variables should be aggregate with the same function. The names of the variables if specified are going to be the name of the parent column.
 #' @param aggregate.function function specify by the user to aggregate the variable specified in variable.to.add. This function should take a vector as a parameter and return a single output.
-#' @param uuid.name.loop optional: Specify the loop column containing the uuids. If not specify, searches for column containing uuid string
-#' @param uuid.name.parent optional: Specify the parent column containing the uuids. If not specify, searches for column containing uuid string
-#' @details Add to the parent dataframe, column(s) that is(are) the result of the aggregation defined by the function aggregate.function.
-#' @return Parent dataframe with the results of the aggregation
+#' @param uuid.name.loop optional: a string that specify the name of the loop column containing the uuids. If not specify, searches for column containing uuid string.
+#' @param uuid.name.parent optional: a string that specify the name of the parent column containing the uuids. If not specify, searches for column containing uuid string.
+#' @details Add to the parent dataframe, column(s) that is(are) the result of the aggregation made on the loop dataframe. This aggregation is defined by the function aggregate.function.
+#' @return the parent dataframe to which column(s) has been added. The column(s) contains for each parent the result of the aggregation on the loop rows that correspond to the same parent.
 #' @examples
+#' variable.to.add <- c(sum_of_child_age="age_child")
 #' parent <- data.frame(uuid=1:10, age_parent=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
 #' child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age_child=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
-#' family <- affect_loop_to_parent(child, parent,aggregate.function = sum , variable.to.add = c(sum_of_child_age="age_child"))
+#' family <- affect_loop_to_parent(child, parent,aggregate.function = sum , variable.to.add)
 #' @export
 #'
 affect_loop_to_parent <- function( loop , parent , aggregate.function, variable.to.add, uuid.name.loop=NULL,uuid.name.parent=NULL)
@@ -173,9 +170,14 @@ affect_loop_to_parent <- function( loop , parent , aggregate.function, variable.
     # if name is not specified
     if(length(names(variable.to.add[i])) == 0 || names(variable.to.add[i]) == "" ){
       new_variable_name <- paste0("Aggregation_Result_",variable.to.add[i])
+
       while(new_variable_name %in% names(new_parent)){ #in order to have a unique column name
         new_variable_name <- paste0(new_variable_name,"X")
       }
+      warning_msg <- paste("You have not specified a column name for the variable:",variable.to.add[i])
+      warning_msg <- paste(warning_msg, "It has been renamed:")
+      warning_msg <- paste(warning_msg, new_variable_name )
+      warning(warning_msg)
     }
     else{
       if(names(variable.to.add[i]) %in% names(new_parent)){
