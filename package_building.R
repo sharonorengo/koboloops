@@ -1,7 +1,5 @@
 devtools::install_github("r-lib/devtools")
 
-
-
 getwd()
 library(devtools)
 find_rtools()

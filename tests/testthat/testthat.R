@@ -12,9 +12,12 @@ parent_data2 <- data.frame(index=1:10, age_parent=runif(10,5,30), other=runif(10
 #uuid are not the same as for the parent uuids
 loop_data2 <- data.frame(parent_uuid=sample(11:20,20,replace = T), initial=sample(c("A","B","C"),20,replace = T),index=1:10)
 
+#Rename columns if name already exist in parent dataframe
+parent_data3 <- data.frame(parent_data1,Aggregation_Result_age_child=NA, Aggregation_Result_age_childX=1:20 )
 
-sum_index <- function(x, variable.to.add){
-  result_aggregation <- sum(x[[variable.to.add]])
+#function to aggregate
+sum_index <- function(x){
+  result_aggregation <- sum(x)
   return(result_aggregation)
 }
 
@@ -73,11 +76,21 @@ test_that("parent and loop don't have common index", {
   expect_error(affect_loop_to_parent(loop_data2,parent_data1,sum_index, "index"))
 })
 
+test_that("column name already exists in parent dataframe", {
+  expect_error(affect_loop_to_parent(loop_data1, parent_data1,sum_index, c(age_parent="index")))
+})
+
+test_that("test for renaming column", {
+  expect_identical( names(affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index",sum_child_age="age_child"))) , c("uuid","age_parent","other","index","sum_child_age"))
+  expect_identical( affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index"))[,"uuid"] , parent_data1[,"uuid"])
+  expect_identical(names(affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index"))), c("uuid","age_parent","other","Aggregation_Result_index"))
+  expect_identical(names(affect_loop_to_parent(loop_data1, parent_data3 ,sum_index, c("age_child"))), c("uuid", "age_parent", "other", "Aggregation_Result_age_child", "Aggregation_Result_age_childX", "Aggregation_Result_age_childXX"))
+})
+
 
 test_that("positive test affect_loop_to_parent", {
   expect_equal( nrow(affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index"))) , 10 )
-  expect_identical( names(affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index"))) , c("uuid","age_parent","other","index"))
+  expect_identical( names(affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index",sum_age_child="age_child"))) , c("uuid","age_parent","other","Aggregation_Result_index","sum_age_child"))
   expect_identical( affect_loop_to_parent(loop_data1, parent_data1 ,sum_index, c("index"))[,"uuid"] , parent_data1[,"uuid"])
 })
-
 
