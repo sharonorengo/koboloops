@@ -98,10 +98,11 @@ add_parent_to_loop <- function(loop, parent , variables.to.keep=NULL , uuid.name
 #' @details Add to the parent dataframe, column(s) that is(are) the result of the aggregation made on the loop dataframe. This aggregation is defined by the function aggregate.function.
 #' @return the parent dataframe to which column(s) has been added. The column(s) contains for each parent the result of the aggregation on the loop rows that correspond to the same parent.
 #' @examples
-#' variable.to.add <- c(sum_of_child_age="age_child")
+
 #' parent <- data.frame(uuid=1:10, age_parent=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
 #' child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age_child=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
-#' family <- affect_loop_to_parent(child, parent,aggregate.function = sum , variable.to.add)
+#' family <- affect_loop_to_parent(child, parent,aggregate.function = sum , variable.to.add = c(sum_of_child_age="age_child"))
+
 #' @export
 #'
 affect_loop_to_parent <- function( loop , parent , aggregate.function, variable.to.add, uuid.name.loop=NULL,uuid.name.parent=NULL)
