@@ -14,23 +14,21 @@ add_parent_to_loop(loop, parent, variables.to.keep = NULL,
 
 \item{variables.to.keep}{optional: a string or a vector of string containing the parent columns names that need to be copy in the loop dataset}
 
-\item{uuid.name.loop}{optional: Specify the loop column containing the uuids. If not specify, searches for column containing uuid string}
+\item{uuid.name.loop}{optional: a string that specify the name of the loop column containing the uuids. If not specify, searches for column containing the uuid string}
 
-\item{uuid.name.parent}{optional: Specify the parent column containing the uuids. If not specify, searches for column containing uuid string}
+\item{uuid.name.parent}{optional: a string that specify the name of the parent column containing the uuids. If not specify, searches for column containing uuid string}
 }
 \value{
-loop dataframe with the chosen parent variables in addition
+the loop dataframe to which for each row has been added the corresponding value of the parent dataframe variable
 }
 \description{
 Add rows of the parent dataframe
 }
 \details{
-Searches for parent row for each row in loop, select the rows of the parent dataframe and add them to the loop dataframe
+Searches for each row in loop dataframe if it matches with a row of the parent datarame. Select in the row of the parent dataframe, the information that the user wants to add to the loop dataframe
 }
 \examples{
 parent <- data.frame(uuid=1:10, age=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
 child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
 family<- add_parent_to_loop(child,parent,c("age"))
-equivalente to
-family<- add_parent_to_loop(child,parent,"parent_uuid","uuid",c("age"))
 }

@@ -12,29 +12,26 @@ affect_loop_to_parent(loop, parent, aggregate.function, variable.to.add,
 
 \item{parent}{a dataframe containing the parent informations}
 
-\item{aggregate.function}{function specify by the user to aggregate one or several variables}
+\item{aggregate.function}{function specify by the user to aggregate the variable specified in variable.to.add. This function should take a vector as a parameter and return a single output.}
 
-\item{uuid.name.loop}{optional: Specify the loop column containing the uuids. If not specify, searches for column containing uuid string}
+\item{variable.to.add}{a name character vector. This vector contains the exact variable(s) name(s) of the loop dataframe that the user wants to aggregate.
+If there are multiple variables, the variables should be aggregate with the same function. The names of the variables if specified are going to be the name of the parent column.}
 
-\item{uuid.name.parent}{optional: Specify the parent column containing the uuids. If not specify, searches for column containing uuid string}
+\item{uuid.name.loop}{optional: a string that specify the name of the loop column containing the uuids. If not specify, searches for column containing uuid string.}
 
-\item{variables.to.add}{variable(s) to aggregate}
+\item{uuid.name.parent}{optional: a string that specify the name of the parent column containing the uuids. If not specify, searches for column containing uuid string.}
 }
 \value{
-Parent dataframe with the results of the aggregation
+the parent dataframe to which column(s) has been added. The column(s) contains for each parent the result of the aggregation on the loop rows that correspond to the same parent.
 }
 \description{
 Add rows of the parent dataframe
 }
 \details{
-Add to child information to the corresponding parent by aggregateing with a function specify by the user
+Add to the parent dataframe, column(s) that is(are) the result of the aggregation made on the loop dataframe. This aggregation is defined by the function aggregate.function.
 }
 \examples{
-parent <- data.frame(uuid=1:10, age=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
-child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
-aggregate.function <- function(x, variable.to.add){
-   result_aggregation <- sum(x[[variable.to.add]])
-   return(result_aggregation)
-}
-family <- affect_loop_to_parent(child, parent, "age",aggregate.function)
+parent <- data.frame(uuid=1:10, age_parent=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
+child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age_child=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
+family <- affect_loop_to_parent(child, parent,aggregate.function = sum , variable.to.add = c(sum_of_child_age="age_child"))
 }

@@ -98,10 +98,10 @@ add_parent_to_loop <- function(loop, parent , variables.to.keep=NULL , uuid.name
 #' @details Add to the parent dataframe, column(s) that is(are) the result of the aggregation made on the loop dataframe. This aggregation is defined by the function aggregate.function.
 #' @return the parent dataframe to which column(s) has been added. The column(s) contains for each parent the result of the aggregation on the loop rows that correspond to the same parent.
 #' @examples
-
+#' variable.to.add = c(sum_of_child_age="age_child")
 #' parent <- data.frame(uuid=1:10, age_parent=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
 #' child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age_child=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
-#' family <- affect_loop_to_parent(child, parent,aggregate.function = sum , variable.to.add = c(sum_of_child_age="age_child"))
+#' family <- affect_loop_to_parent(child, parent,aggregate.function = sum , variable.to.add)
 
 #' @export
 #'
@@ -156,45 +156,57 @@ affect_loop_to_parent <- function( loop , parent , aggregate.function, variable.
     stop(variables_Not_Exist_Error_Message)
   }
 
-  #creates a list of dataframe. Each element of the list is a dataframe containing the loop rows corresponding to the same parent uuid
-  split_pivot <- loop[[uuid.name.loop]]
-  split_loop <- split(loop, split_pivot)
-
   #For each variable to add, aggregate loop elements and add the result in a new column of the parent dataframe
   new_parent <- parent
+
   for(i in 1:length(variable.to.add)){
 
-    # For each dataframe of the list, aggregate variable.to.add by using the function choosen by the user
-    result_aggregation <- lapply( lapply(split_loop, function(x) x[[variable.to.add[i]]]), aggregate.function)
+    column_aggregated <- aggregate_column_of_dataframe(loop, uuid.name.loop , variable.to.add[i] , aggregate.function )
 
-    #Rename the column containing the results of the aggregation
-    # if name is not specified
-    if(length(names(variable.to.add[i])) == 0 || names(variable.to.add[i]) == "" ){
-      new_variable_name <- paste0("Aggregation_Result_",variable.to.add[i])
+    new_variable_name <- rename_column_aggregated(new_parent , variable.to.add[i])
 
-      while(new_variable_name %in% names(new_parent)){ #in order to have a unique column name
-        new_variable_name <- paste0(new_variable_name,"X")
-      }
-      warning_msg <- paste("You have not specified a column name for the variable:",variable.to.add[i])
-      warning_msg <- paste(warning_msg, "It has been renamed:")
-      warning_msg <- paste(warning_msg, new_variable_name )
-      warning(warning_msg)
-    }
-    else{
-      if(names(variable.to.add[i]) %in% names(new_parent)){
-        stop("Please choose another variable name. This column name already exists in the parent dataframe")
-      }
-      else{
-        new_variable_name <- names(variable.to.add[i])
-      }
-    }
-    new_parent[[variable.to.add[i]]]<-NA #NA for the parent that doesn't correspond to any loop rows
-    uuid_into_parent=which((parent$uuid %in% names(result_aggregation))==TRUE)
-    new_parent[[variable.to.add[i]]][uuid_into_parent] <- result_aggregation
+    new_parent[[variable.to.add[i]]]<-NA #NA
+    uuid_into_parent=which((parent[[uuid.name.parent]] %in% column_aggregated[,1])==TRUE)
+    new_parent[[variable.to.add[i]]][uuid_into_parent] <- column_aggregated[,2]
     names(new_parent)[length(new_parent)] <- new_variable_name
   }
 
   return(new_parent)
+}
+
+
+aggregate_column_of_dataframe <- function(data, pivot_column, column_to_aggregate, aggregate.function ) {
+
+  select_column_to_aggregate <- select( data , c( pivot_column , column_to_aggregate))
+  grouped_by_pivot_column <- group_by_(select_column_to_aggregate , pivot_column)
+  result_aggregation <- summarise_all( grouped_by_pivot_column , aggregate.function )
+  result_aggregation <- as.data.frame(result_aggregation)
+  return(result_aggregation)
+
+}
+
+
+rename_column_aggregated <- function(data , var_aggregated){
+  if(length(names(var_aggregated)) == 0 || names(var_aggregated) == "" ){
+    new_var_name <- paste0("Aggregation_Result_",var_aggregated)
+
+    while(new_var_name %in% names(data)){ #in order to have a unique column name
+      new_var_name <- paste0(new_var_name,"X")
+    }
+    warning_msg <- paste("You have not specified a column name for the variable:",var_aggregated)
+    warning_msg <- paste(warning_msg, "It has been renamed:")
+    warning_msg <- paste(warning_msg, new_var_name )
+    warning(warning_msg)
+  }
+  else{
+    if(names(var_aggregated) %in% names(data)){
+      stop("Please choose another variable name. This column name already exists in the parent dataframe")
+    }
+    else{
+      new_var_name <- names(var_aggregated)
+    }
+  }
+  return(new_var_name)
 }
 
 
