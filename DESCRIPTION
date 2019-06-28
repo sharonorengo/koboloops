@@ -27,5 +27,7 @@ RoxygenNote: 6.1.1
 Imports: 
     knitr
 Depends: 
-    dplyr
+    dplyr,
+    knitr, 
+    dplyr  
 
