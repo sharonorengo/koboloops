@@ -1,0 +1,78 @@
+---
+title: "Exemple détaillé"
+author: "Sharon"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Detailed Example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# Test des fonctions
+
+
+## Charger l'outil koboloops
+
+```{r, results='hide', message=FALSE,warning=FALSE,error=FALSE}
+library("koboloops")
+```
+
+## Exemple de tableau de donnée
+Ici, nous créons des données factices à des fins d'illustration.
+Ce n'est pas important de comprendre cela; nous le conservons afin que vous puissiez exécuter l'exemple vous-même si vous le souhaitez.
+Il y a deux jeux de données.
+
+Le tableau parent contient:
+
+- variable `uuid`: les valeurs doivent être uniques
+- variable `age`: valeurs comprises entre 30 et 60
+- variable `parent_gender`
+
+Le tableau enfant contient:
+
+- variable `parent_uuid`: devrait être un nombre parmi les uuid de l'ensemble de données parent
+- variable `age`: valeurs comprises entre 1 et 18
+- variable `child_gender` juste quelques chiffres, mais l'en-tête de colonne indique que cela est potentiellement sensible
+
+
+```{r}
+parent <- data.frame(uuid=1:10, age_parent=sample(30:60,10,replace = T),parent_gender=sample(c("F","M"),10,replace = T))
+
+child <- data.frame(parent_uuid=sample(1:10,20,replace = T), age_child=sample(1:18,20,replace=T), child_gender=sample(c("F","M"),20,replace = T))
+```
+
+## Affecter l'age des parents à chaque enfant
+
+
+```{r,eval=F}
+family <- add_parent_to_loop(child,parent,uuid.name.loop = "parent_uuid",uuid.name.parent = "uuid",c("age_parent"))
+family
+```
+
+run `?add_parent_to_loop` pour plus de détails.
+
+## Affecter toutes les informations des parents à chaque enfant.
+Nous affectons au parent l'âge moyen des enfants.
+
+```{r}
+variable.to.add = c(mean_of_child_age="age_child")
+```
+
+```{r,eval=F}
+family <- affect_loop_to_parent(child, parent,aggregate.function = mean , variable.to.add)
+family
+```
+
+run `?affect_loop_to_parent` pour plus de détails.
+
+
+

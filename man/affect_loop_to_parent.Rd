@@ -31,7 +31,8 @@ Add rows of the parent dataframe
 Add to the parent dataframe, column(s) that is(are) the result of the aggregation made on the loop dataframe. This aggregation is defined by the function aggregate.function.
 }
 \examples{
+variable.to.add = c(sum_of_child_age="age_child")
 parent <- data.frame(uuid=1:10, age_parent=sample(10,30,60),gender=sample(c("F","M"),10,replace = T) )
 child <- data.frame (parent_uuid=sample(1:10,20,replace = T), age_child=sample(20,1,18)  gender=sample(c("F","M"),20,replace = T))
-family <- affect_loop_to_parent(child, parent,aggregate.function = sum , variable.to.add = c(sum_of_child_age="age_child"))
+family <- affect_loop_to_parent(child, parent,aggregate.function = sum , variable.to.add)
 }
