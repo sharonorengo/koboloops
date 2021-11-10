@@ -165,9 +165,11 @@ affect_loop_to_parent <- function( loop , parent , aggregate.function, variable.
 
     new_variable_name <- rename_column_aggregated(new_parent , variable.to.add[i])
 
-    new_parent[[variable.to.add[i]]]<-NA #NA
-    uuid_into_parent=which((parent[[uuid.name.parent]] %in% column_aggregated[,1])==TRUE)
-    new_parent[[variable.to.add[i]]][uuid_into_parent] <- column_aggregated[,2]
+    colnames(column_aggregated)[1] <- uuid.name.parent
+    new_parent <- left_join(x = new_parent, y = column_aggregated)
+    # new_parent[[variable.to.add[i]]]<-NA #NA
+    # uuid_into_parent=which((parent[[uuid.name.parent]] %in% column_aggregated[,1])==TRUE)
+    # new_parent[[variable.to.add[i]]][uuid_into_parent] <- column_aggregated[,2]
     names(new_parent)[length(new_parent)] <- new_variable_name
   }
 
